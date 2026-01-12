@@ -1,39 +1,43 @@
-import BookingForm from "@/components/booking/BookingForm";
-import OrderSummary from "@/components/booking/OrderSummary";
-import CancellationPolicy from "@/components/booking/CancellationPolicy"; // Import the new component
+import axios from "axios";
+import { useState } from "react";
 
-// Define the component structure for the booking page
-export default function BookingPage() {
-  // Static data for the order summary
-  const bookingDetails = {
-    propertyName: "Villa Arrecife Beach House",
-    // Note: The price is per night for better calculation in OrderSummary
-    price: 750, 
-    bookingFee: 65,
-    totalNights: 3,
-    startDate: "24 August 2024",
+export default function BookingForm() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    cardNumber: "",
+    expirationDate: "",
+    cvv: "",
+    billingAddress: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post("/api/bookings", formData);
+      alert("Booking confirmed!");
+    } catch (error) {
+      setError("Failed to submit booking.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-8">
-        Secure Your Booking
-      </h1>
-      
-      {/* Main Grid Layout - Responsive for Desktop and Mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: Form and Policy (2/3 width on desktop) */}
-        <div className="lg:col-span-2 space-y-8">
-          <BookingForm />
-          <CancellationPolicy />
-        </div>
-        
-        {/* Right Column: Order Summary (1/3 width on desktop) */}
-        <div className="lg:col-span-1">
-          <OrderSummary bookingDetails={bookingDetails} />
-        </div>
-      </div>
-    </div>
+    <form onSubmit={handleSubmit}>
+      {/* Form fields for booking details */}
+      <button type="submit" disabled={loading}>
+        {loading ? "Processing..." : "Confirm & Pay"}
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </form>
   );
 }
